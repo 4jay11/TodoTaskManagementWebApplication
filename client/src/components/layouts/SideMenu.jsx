@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import { LuLogOut } from "react-icons/lu";
 
 const SideMenu = () => {
   const { sidebarOpen } = useSelector((state) => state.ui);

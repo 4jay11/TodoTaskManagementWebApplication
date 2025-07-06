@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 
-import { tasksAPI, subtasksAPI, userTasksAPI } from "../services/api";
+import { tasksAPI, subtasksAPI} from "../services/api";
 import { updateTask, deleteTask } from "../store/slices/taskSlice";
 
 const TaskDetails = () => {
@@ -23,7 +23,6 @@ const TaskDetails = () => {
   const [subtaskInput, setSubtaskInput] = useState("");
   const [attachmentInput, setAttachmentInput] = useState("");
   const [selectedMember, setSelectedMember] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const userId = user._id;
 

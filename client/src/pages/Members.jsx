@@ -13,7 +13,6 @@ const Members = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [emailSearchTerm, setEmailSearchTerm] = useState("");
   const [selectedSkill, setSelectedSkill] = useState("");
-  const [availableSkills, setAvailableSkills] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -67,16 +66,8 @@ const Members = () => {
     setFilteredMembers(result);
   }, [searchTerm, selectedSkill, members]);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
   const handleEmailSearchChange = (e) => {
     setEmailSearchTerm(e.target.value);
-  };
-
-  const handleSkillChange = (e) => {
-    setSelectedSkill(e.target.value);
   };
 
   const clearFilters = () => {
