@@ -21,11 +21,6 @@ const Login = () => {
     <div className="p-4 text-center">
       <h2 className="text-xl font-semibold">Login Page</h2>
       <p>If you're seeing this, the login route is working!</p>
-      <button onClick={() => {
-        window.location.href = "http://localhost:8000/api/auth/google";
-      }}>
-        Login with Google
-      </button>
     </div>
   );
 };

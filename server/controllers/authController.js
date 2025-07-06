@@ -89,10 +89,11 @@ exports.login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Send user info
+    // Send user info and token in response body
     res.status(200).json({
       success: true,
       message: "Login successful",
+      token: token, // Add token to response
       user: {
         _id: user._id,
         name: user.name,
@@ -111,7 +112,7 @@ exports.login = async (req, res) => {
 };
 
 // @route GET /api/auth/google
-exports.  googleAuth = passport.authenticate("google", {
+exports.googleAuth = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
@@ -139,8 +140,20 @@ exports.googleCallback = (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Redirect to frontend without token in URL
-    res.redirect(`${process.env.CLIENT_URL}/oauth-success`);
+    // Encode user data for URL
+    const userData = encodeURIComponent(
+      JSON.stringify({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      })
+    );
+
+    // Redirect to frontend with token and user data in URL
+    res.redirect(
+      `${process.env.CLIENT_URL}/oauth-success?token=${token}&user=${userData}`
+    );
   })(req, res, next);
 };
 
@@ -172,9 +185,19 @@ exports.githubCallback = (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Redirect to client with token
+    // Encode user data for URL
+    const userData = encodeURIComponent(
+      JSON.stringify({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      })
+    );
+
+    // Redirect to client with token and user data
     res.redirect(
-      `${process.env.CLIENT_URL}/oauth-success`
+      `${process.env.CLIENT_URL}/oauth-success?token=${token}&user=${userData}`
     );
   })(req, res, next);
 };
@@ -207,9 +230,144 @@ exports.facebookCallback = (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Redirect to client with token
+    // Encode user data for URL
+    const userData = encodeURIComponent(
+      JSON.stringify({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      })
+    );
+
+    // Redirect to client with token and user data
     res.redirect(
-      `${process.env.CLIENT_URL}/oauth-success`
+      `${process.env.CLIENT_URL}/oauth-success?token=${token}&user=${userData}`
     );
   })(req, res, next);
+};
+
+// @route GET /api/auth/me
+// @desc Get user profile
+// @access Private
+exports.getProfile = async (req, res) => {
+  try {
+    // User is already attached to req by the authenticate middleware
+    const user = req.user;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        skills: user.skills || [],
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error("Get profile error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// @route GET /api/auth/users
+// @desc Get all users
+// @access Private
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, "-password");
+
+    res.status(200).json({
+      success: true,
+      data: users.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        skills: user.skills || [],
+        avatar: user.avatar,
+      })),
+    });
+  } catch (error) {
+    console.error("Get all users error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// @route GET /api/auth/users/:id
+// @desc Get user by ID
+// @access Private
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id, "-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        skills: user.skills || [],
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error("Get user by ID error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// @route POST /api/auth/users/search
+// @desc Search users by email
+// @access Private
+exports.searchUsers = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required for search",
+      });
+    }
+
+    // Search for users with email containing the search term
+    const users = await User.find(
+      { email: { $regex: email, $options: "i" } },
+      "-password"
+    ).limit(10);
+
+    res.status(200).json({
+      success: true,
+      data: users.map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        skills: user.skills || [],
+        avatar: user.avatar,
+      })),
+    });
+  } catch (error) {
+    console.error("Search users error:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };

@@ -1,6 +1,9 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
+const taskRoutes = require("./routes/taskRoutes");
+const userTaskRoutes = require("./routes/userTaskRoutes");
+const subTaskRoutes = require("./routes/subTaskRoutes");
 const cors = require("cors");
 const app = express();
 const connectDB = require("./config/db");
@@ -19,7 +22,11 @@ app.use(
   })
 );
 
-app.use('/api/auth', authRoutes);
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/user-tasks", userTaskRoutes);
+app.use("/api/subtasks", subTaskRoutes);
 
 const startServer = async () => {
   try {
