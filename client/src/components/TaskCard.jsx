@@ -1,5 +1,4 @@
 import React from "react";
-import { FiLink } from "react-icons/fi";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 
